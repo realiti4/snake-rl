@@ -1,5 +1,5 @@
 # snake-rl
-Solving Snake game with A2C and PPO
+Solving Snake game fast with A2C and PPO using multiple agents and fp16 training
 
 ## Dependencies
 
