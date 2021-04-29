@@ -24,7 +24,7 @@ test_env = gym.make('snake-v0')
 make_env = lambda: gym.make('snake-v0')
 
 lr, epoch, batch_size = 1e-4, 100, 256
-train_num, test_num = 32, 1
+train_num, test_num = 32, 16
 buffer_size = 2000
 
 train_envs = ts.env.DummyVectorEnv([lambda: make_env() for _ in range(train_num)], norm_obs=False)
@@ -60,18 +60,18 @@ train_collector = ts.data.Collector(policy, train_envs, ts.data.VectorReplayBuff
 test_collector = ts.data.Collector(policy, test_envs)
 
 # Save and Load
-load = True
+load = False
 
 def save_fn(policy, add=''):
-    name = f'saved/t_ppo{add}.pth'
+    name = f'saved/snake_a2c{add}.pth'
     torch.save({'policy_state': policy.state_dict(),
                 'optimizer_state': policy.optim.state_dict(),
                 'scaler': policy.scaler.state_dict(),
                 }, name
                 )
 if load:
-    new_lr = 7e-5
-    load_dict = torch.load('saved/snake_a2c.pth')
+    new_lr = 1e-4
+    load_dict = torch.load('saved/snake_a2c_last.pth')
     policy.load_state_dict(load_dict['policy_state'])
     policy.optim.load_state_dict(load_dict['optimizer_state'])
     policy.scaler.load_state_dict(load_dict['scaler'])
@@ -86,7 +86,7 @@ result = onpolicy_trainer(
         repeat_per_collect=1,
         episode_per_test=test_num,
         batch_size=1024,
-        step_per_collect=32*5,      # check here
+        step_per_collect=32*16,      # 5
         # episode_per_collect=10,
         save_fn=save_fn,
         backup_save_freq=0,
@@ -94,7 +94,7 @@ result = onpolicy_trainer(
 
 # Fun part see the results!
 policy.eval()
-test_collector.collect(n_episode=10, render=0.1)
+test_collector.collect(n_episode=10, render=0.005)
 # obs = test_env.reset()
 # for i in range(1000):
 #     action = input('Where: ')

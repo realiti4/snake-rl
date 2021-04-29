@@ -1,5 +1,6 @@
 # snake-rl
-Solving Snake game fast with A2C and PPO using multiple agents and fp16 training
+This repo tries to solve snake game (10, 10) and (20, 20) in an efficient way with multiple envs and fp16 training
+using A2C and PPO.
 
 ## Dependencies
 
