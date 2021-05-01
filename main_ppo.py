@@ -15,7 +15,7 @@ from model.cnn_model import CNNModel
 from wrapper_test import wrap_deepmind
 
 def make_env_wrapper():
-    return wrap_deepmind('snake-v0', frame_stack=3, scale=True, episode_life=False, clip_rewards=False, unit_size=4)
+    return wrap_deepmind('snake-v0', frame_stack=3, scale=True, episode_life=False, clip_rewards=False, unit_size=4, unit_gap=0)
 
 device = 'cuda'
 
