@@ -48,11 +48,11 @@ class CNNModel(nn.Module):
 
     def forward(self, x):
         # assert x.max() == 255
-        x = x / 255.0
+        # x = x / 255.0
         if not isinstance(x, torch.Tensor):
             x = torch.as_tensor(x, device=self.device, dtype=torch.float32)
 
-        x = x.transpose(1, 3)
+        # x = x.transpose(1, 3)
         output = self.block(x)
         output = self.linear(output.flatten(1))
 

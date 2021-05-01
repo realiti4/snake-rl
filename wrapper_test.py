@@ -63,6 +63,30 @@ class ScaledFloatFrame(gym.ObservationWrapper):
     def observation(self, observation):
         return (observation - self.bias) / self.scale
 
+class WarpFrame(gym.ObservationWrapper):
+    """Warp frames to 84x84 as done in the Nature paper and later work.
+    :param gym.Env env: the environment to wrap.
+    """
+
+    def __init__(self, env):
+        super().__init__(env)
+        self.size = 84
+        self.observation_space = gym.spaces.Box(
+            low=np.min(env.observation_space.low),
+            high=np.max(env.observation_space.high),
+            shape=(self.size, self.size), dtype=env.observation_space.dtype)
+
+    def observation(self, frame):
+        """returns the current observation from a frame"""
+        frame = cv2.cvtColor(frame, cv2.COLOR_RGB2GRAY)
+        return frame    # Don't resize for now
+        return cv2.resize(frame, (self.size, self.size),
+                          interpolation=cv2.INTER_AREA)
+
+    # def step(self, action):
+    #     obs, reward, done, info = self.env.step(action)
+    #     return self.observation(obs), reward, done, info
+
 class FrameStack(gym.Wrapper):
     """Stack n_frames last frames.
     :param gym.Env env: the environment to wrap.
@@ -93,11 +117,11 @@ class FrameStack(gym.Wrapper):
     def _get_ob(self):
         # the original wrapper use `LazyFrames` but since we use np buffer,
         # it has no effect
-        return np.stack(self.frames, axis=0)         
+        return np.stack(self.frames, axis=0)
 
 def wrap_deepmind(env_id, episode_life=True, clip_rewards=True,
                   frame_stack=4, scale=False, warp_frame=True,
-                  punish_stuck_agent=False):
+                  punish_stuck_agent=False, **kwargs):
     """Configure environment for DeepMind-style Atari. The observation is
     channel-first: (c, h, w) instead of (h, w, c).
     :param str env_id: the atari environment id.
@@ -109,7 +133,7 @@ def wrap_deepmind(env_id, episode_life=True, clip_rewards=True,
     :return: the wrapped atari environment.
     """
     # assert 'NoFrameskip' in env_id
-    env = gym.make(env_id)
+    env = gym.make(env_id, **kwargs)
     # env = NoopResetEnv(env, noop_max=30)
     # env = MaxAndSkipEnv(env, skip=4)
     if episode_life:
