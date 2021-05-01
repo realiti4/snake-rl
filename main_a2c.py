@@ -12,29 +12,28 @@ from tianshou.utils.net.common import Net
 from tianshou.utils.net.discrete import Actor, Critic
 
 from model.cnn_model import CNNModel
-from wrapper import wrap_deepmind
+from wrapper_test import wrap_deepmind
 
 def make_env_wrapper():
-    return wrap_deepmind('snake-v0', frame_stack=3)
+    return wrap_deepmind('snake-v0', frame_stack=3, scale=True, episode_life=False, clip_rewards=False, unit_size=4, unit_gap=0)
 
 device = 'cuda'
 
-test_env = gym.make('snake-v0')
-# env = make_env()
 make_env = lambda: gym.make('snake-v0')
 
-lr, epoch, batch_size = 1e-4, 100, 256
-train_num, test_num = 32, 16
+lr, epoch, batch_size = 1e-3, 100, 256
+train_num, test_num = 256, 16
 buffer_size = 2000
 
-train_envs = ts.env.DummyVectorEnv([lambda: make_env() for _ in range(train_num)], norm_obs=False)
-test_envs = ts.env.DummyVectorEnv([lambda: make_env() for _ in range(test_num)], norm_obs=False)
+# Use SubprocVectorEnv instead of Dummy one if you are on
+train_envs = ts.env.DummyVectorEnv([lambda: make_env_wrapper() for _ in range(train_num)], norm_obs=False)
+test_envs = ts.env.DummyVectorEnv([lambda: make_env_wrapper() for _ in range(test_num)], norm_obs=False)
 
 state_shape = train_envs.observation_space[0].shape or train_envs.observation_space[0].n
 action_shape = train_envs.action_space[0].shape or train_envs.action_space[0].n
 
 # Actor, Critic
-custom_kwargs = {'output_dim': 512, 'kernel_size': 8, 'dropout': 0.25}
+custom_kwargs = {'output_dim': 1024, 'kernel_size': 8, 'dropout': 0.25}
 hidden_sizes=[1024, 1024, 1024]
 
 net = Net(state_shape, hidden_sizes=hidden_sizes,
@@ -63,15 +62,15 @@ test_collector = ts.data.Collector(policy, test_envs)
 load = False
 
 def save_fn(policy, add=''):
-    name = f'saved/snake_a2c{add}.pth'
+    name = f'saved/snake_a2c2{add}.pth'
     torch.save({'policy_state': policy.state_dict(),
                 'optimizer_state': policy.optim.state_dict(),
                 'scaler': policy.scaler.state_dict(),
                 }, name
                 )
 if load:
-    new_lr = 1e-4
-    load_dict = torch.load('saved/snake_a2c_last.pth')
+    new_lr = 1e-3
+    load_dict = torch.load('saved/snake_a2c2_last.pth')
     policy.load_state_dict(load_dict['policy_state'])
     policy.optim.load_state_dict(load_dict['optimizer_state'])
     policy.scaler.load_state_dict(load_dict['scaler'])
@@ -80,28 +79,20 @@ if load:
 
 
 result = onpolicy_trainer(
-        policy, train_collector, test_collector, 
+        policy, train_collector, test_collector,
         max_epoch=epoch,
-        step_per_epoch=400000,
+        step_per_epoch=1600000,
         repeat_per_collect=1,
         episode_per_test=test_num,
         batch_size=1024,
-        step_per_collect=32*16,      # 5
+        step_per_collect=train_num*5,      # 5
         # episode_per_collect=10,
         save_fn=save_fn,
         backup_save_freq=0,
         )
 
 # Fun part see the results!
+eval_env = make_env_wrapper()
+eval_collector = ts.data.Collector(policy, eval_env)
 policy.eval()
-test_collector.collect(n_episode=10, render=0.005)
-# obs = test_env.reset()
-# for i in range(1000):
-#     action = input('Where: ')
-
-#     obs, reward, done, info = test_env.step(action)
-#     obs = np.divide(obs, 255, dtype=np.float32)     # preprocess
-#     print(done)
-#     test_env.render()
-
-print('de')
+eval_collector.collect(n_episode=10, render=0.005)

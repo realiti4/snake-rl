@@ -19,8 +19,6 @@ def make_env_wrapper():
 
 device = 'cuda'
 
-eval_env = gym.make('snake-v0')
-# env = make_env()
 make_env = lambda: gym.make('snake-v0')
 
 lr, epoch, batch_size = 1e-3, 100, 256
@@ -61,7 +59,7 @@ train_collector = ts.data.Collector(policy, train_envs, ts.data.VectorReplayBuff
 test_collector = ts.data.Collector(policy, test_envs)
 
 # Save and Load
-load = False
+load = True
 
 def save_fn(policy, add=''):
     name = f'saved/snake_ppo2{add}.pth'
@@ -87,7 +85,7 @@ result = onpolicy_trainer(
         repeat_per_collect=1,
         episode_per_test=test_num,
         batch_size=1024,
-        step_per_collect=256*32,      # 5
+        step_per_collect=train_num*32,      # 5
         # episode_per_collect=10,
         save_fn=save_fn,
         backup_save_freq=0,
@@ -98,13 +96,3 @@ eval_env = make_env_wrapper()
 eval_collector = ts.data.Collector(policy, eval_env)
 policy.eval()
 eval_collector.collect(n_episode=10, render=0.005)
-# obs = test_env.reset()
-# for i in range(1000):
-#     action = input('Where: ')
-
-#     obs, reward, done, info = test_env.step(action)
-#     obs = np.divide(obs, 255, dtype=np.float32)     # preprocess
-#     print(done)
-#     test_env.render()
-
-print('de')
