@@ -19,7 +19,7 @@ class CNNModel(nn.Module):
             nn.ReLU(),
             nn.Conv2d(64, 64, 5, stride=2, padding=1),
             nn.ReLU(),
-            nn.Conv2d(64, 16, 3, stride=1, padding=1),
+            nn.Conv2d(64, 64, 3, stride=1, padding=1),
             nn.ReLU(),
         )
 
@@ -44,7 +44,14 @@ class CNNModel(nn.Module):
         #     nn.ReLU(),
         # )
 
-        self.linear = nn.Linear(2304, 1024)
+        # self.linear = nn.Linear(1024, 1024)
+
+        self.linear = nn.Sequential(
+            nn.Linear(1024, 1024),
+            nn.ReLU(),
+            nn.Linear(1024, 1024),
+            nn.ReLU(),
+        )
 
     def forward(self, x):
         # assert x.max() == 255

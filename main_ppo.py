@@ -15,7 +15,7 @@ from model.cnn_model import CNNModel
 from wrapper_test import wrap_deepmind
 
 def make_env_wrapper():
-    return wrap_deepmind('snake-v0', frame_stack=3, scale=True, episode_life=False, clip_rewards=False)
+    return wrap_deepmind('snake-v0', frame_stack=3, scale=True, episode_life=False, clip_rewards=False, unit_size=4)
 
 device = 'cuda'
 
@@ -61,7 +61,7 @@ train_collector = ts.data.Collector(policy, train_envs, ts.data.VectorReplayBuff
 test_collector = ts.data.Collector(policy, test_envs)
 
 # Save and Load
-load = True
+load = False
 
 def save_fn(policy, add=''):
     name = f'saved/snake_ppo2{add}.pth'
