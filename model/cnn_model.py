@@ -13,11 +13,11 @@ class CNNModel(nn.Module):
         self.device = device       
 
         self.block = nn.Sequential(
-            nn.Conv2d(3, 64, 7, stride=2, padding=3),
+            nn.Conv2d(3, 64, 5, stride=2, padding=2),
             nn.ReLU(),
-            nn.Conv2d(64, 64, 5, stride=2, padding=2),
+            nn.Conv2d(64, 64, 3, stride=2, padding=1),
             nn.ReLU(),
-            nn.Conv2d(64, 64, 5, stride=2, padding=1),
+            nn.Conv2d(64, 64, 1, stride=2),
             nn.ReLU(),
             # nn.Conv2d(64, 64, 3, stride=1, padding=1),
             # nn.ReLU(),
@@ -26,7 +26,7 @@ class CNNModel(nn.Module):
         # self.linear = nn.Linear(1024, 1024)
 
         self.linear = nn.Sequential(
-            nn.Linear(1024, 1024),
+            nn.Linear(1600, 1024),
             nn.ReLU(),
             nn.Linear(1024, 1024),
             nn.ReLU(),
