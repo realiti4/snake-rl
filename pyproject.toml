@@ -33,7 +33,7 @@ torchaudio = [
   { index = "pytorch-cu128"},
 ]
 tianshou = { git = "https://github.com/realiti4/tianshou", branch = "master" }
-Gym-Snake = { path = "../Gym-Snake", editable = true }
+Gym-Snake = { git = "https://github.com/realiti4/Gym-Snake", branch = "master" }
 
 [[tool.uv.index]]
 name = "pytorch-cpu-source"
