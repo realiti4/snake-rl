@@ -2,7 +2,7 @@
 # https://github.com/openai/baselines/blob/master/baselines/common/atari_wrappers.py
 
 import cv2
-import gym
+import gymnasium as gym
 import numpy as np
 from collections import deque
 
@@ -24,7 +24,7 @@ class NoopResetEnv(gym.Wrapper):
         self.env.reset()
         noops = np.random.randint(1, self.noop_max + 1)
         for _ in range(noops):
-            obs, _, done, _ = self.env.step(self.noop_action)
+            obs, _, done, _, _ = self.env.step(self.noop_action)
             if done:
                 obs = self.env.reset()
         return obs
@@ -47,7 +47,7 @@ class MaxAndSkipEnv(gym.Wrapper):
         """
         obs_list, total_reward, done = [], 0., False
         for i in range(self._skip):
-            obs, reward, done, info = self.env.step(action)
+            obs, reward, done, truncated, info = self.env.step(action)
             obs_list.append(obs)
             total_reward += reward
             if done:
@@ -68,7 +68,7 @@ class EpisodicLifeEnv(gym.Wrapper):
         self.was_real_done = True
 
     def step(self, action):
-        obs, reward, done, info = self.env.step(action)
+        obs, reward, done, truncated, info = self.env.step(action)
         self.was_real_done = done
         # check current lives, make loss of life terminal, then update lives to
         # handle bonus lives
@@ -79,7 +79,7 @@ class EpisodicLifeEnv(gym.Wrapper):
             # once the environment is actually done.
             done = True
         self.lives = lives
-        return obs, reward, done, info
+        return obs, reward, done, truncated, info
 
     def reset(self):
         """Calls the Gym environment reset, only when lives are exhausted. This
@@ -187,7 +187,7 @@ class FrameStack(gym.Wrapper):
         return self._get_ob()
 
     def step(self, action):
-        obs, reward, done, info = self.env.step(action)
+        obs, reward, done, truncated, info = self.env.step(action)
         self.frames.append(obs)
         return self._get_ob(), reward, done, info
 

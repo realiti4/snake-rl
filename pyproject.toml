@@ -3,11 +3,11 @@ name = "snake-rl"
 version = "0.1.0"
 description = "Reinforcement Learning for Snake Game using A2C and PPO algorithms with Tianshou"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.12"
 dependencies = [
     "torch>=2.7.1",
-    "torchvision>=0.20.1",
-    "torchaudio>=2.5.1",
+    "torchvision>=0.22.1",
+    "torchaudio>=2.7.1",
     "tianshou",
     "Gym-Snake",
     "opencv-python>=4.11.0.86",
@@ -33,7 +33,7 @@ torchaudio = [
   { index = "pytorch-cu128"},
 ]
 tianshou = { git = "https://github.com/realiti4/tianshou", branch = "master" }
-Gym-Snake = { git = "https://github.com/realiti4/Gym-Snake.git", branch = "master" }
+Gym-Snake = { path = "../Gym-Snake", editable = true }
 
 [[tool.uv.index]]
 name = "pytorch-cpu-source"

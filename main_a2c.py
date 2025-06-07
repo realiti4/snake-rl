@@ -1,5 +1,5 @@
 import numpy as np
-import gym
+import gymnasium as gym
 import gym_snake
 
 import torch
@@ -25,8 +25,8 @@ train_num, test_num = 256, 16
 buffer_size = 2000
 
 # Use SubprocVectorEnv instead of Dummy one if you are on
-train_envs = ts.env.DummyVectorEnv([lambda: make_env_wrapper() for _ in range(train_num)], norm_obs=False)
-test_envs = ts.env.DummyVectorEnv([lambda: make_env_wrapper() for _ in range(test_num)], norm_obs=False)
+train_envs = ts.env.DummyVectorEnv([lambda: make_env_wrapper() for _ in range(train_num)])
+test_envs = ts.env.DummyVectorEnv([lambda: make_env_wrapper() for _ in range(test_num)])
 
 state_shape = train_envs.observation_space[0].shape or train_envs.observation_space[0].n
 action_shape = train_envs.action_space[0].shape or train_envs.action_space[0].n
@@ -48,7 +48,7 @@ optim = torch.optim.Adam        # dummy optim
 dist = torch.distributions.Categorical
 policy = ts.policy.A2CPolicy(actor, critic, optim, dist,
             max_grad_norm=0.5,
-            use_mixed=True,
+            use_autocast=True,
             )
 
 policy.optim = torch.optim.Adam(policy.parameters(), lr=lr)
@@ -58,10 +58,10 @@ train_collector = ts.data.Collector(policy, train_envs, ts.data.VectorReplayBuff
 test_collector = ts.data.Collector(policy, test_envs)
 
 # Save and Load
-load = False
+load = True
 
 def save_fn(policy, add=''):
-    name = f'saved/snake_a2c2{add}.pth'
+    name = f'saved/snake_a2c{add}.pth'
     torch.save({'policy_state': policy.state_dict(),
                 'optimizer_state': policy.optim.state_dict(),
                 'scaler': policy.scaler.state_dict(),
@@ -69,7 +69,7 @@ def save_fn(policy, add=''):
                 )
 if load:
     new_lr = 1e-3
-    load_dict = torch.load('saved/snake_a2c2_last.pth')
+    load_dict = torch.load('saved/snake_a2c.pth')
     policy.load_state_dict(load_dict['policy_state'])
     policy.optim.load_state_dict(load_dict['optimizer_state'])
     policy.scaler.load_state_dict(load_dict['scaler'])
@@ -87,7 +87,7 @@ result = onpolicy_trainer(
         step_per_collect=train_num*5,      # 5
         # episode_per_collect=10,
         save_fn=save_fn,
-        backup_save_freq=0,
+        # backup_save_freq=0,
         )
 
 # Fun part see the results!
