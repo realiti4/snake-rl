@@ -1,5 +1,5 @@
 import cv2
-import gym
+import gymnasium as gym
 import numpy as np
 from collections import deque
 
@@ -27,7 +27,7 @@ class PunishStuckAgent(gym.Wrapper):
         self.max_len = 10000
 
     def step(self, action):
-        obs, reward, done, info = self.env.step(action)
+        obs, reward, done, truncated, info = self.env.step(action)
         # Max length control - terminate after not seeing a reward after n steps
         if reward == 0:
             self.count += 1
@@ -39,11 +39,12 @@ class PunishStuckAgent(gym.Wrapper):
             if self.count >= self.max_len:  # And we gonna terminate
                 print('Debug: Reached max length')
                 done = True
-        return obs, reward, done, info
+        return obs, reward, done, truncated, info
 
-    def reset(self):
-        self.env.reset()
+    def reset(self, **kwargs):
+        obs, info = self.env.reset(**kwargs)
         self.count = 0
+        return obs, info
 
 class ScaledFloatFrame(gym.ObservationWrapper):
     """Normalize observations to 0~1.
@@ -84,7 +85,7 @@ class WarpFrame(gym.ObservationWrapper):
                           interpolation=cv2.INTER_AREA)
 
     # def step(self, action):
-    #     obs, reward, done, info = self.env.step(action)
+    #     obs, reward, done, truncated, info = self.env.step(action)
     #     return self.observation(obs), reward, done, info
 
 class FrameStack(gym.Wrapper):
@@ -103,23 +104,23 @@ class FrameStack(gym.Wrapper):
             high=np.max(env.observation_space.high),
             shape=shape, dtype=env.observation_space.dtype)
 
-    def reset(self):
-        obs = self.env.reset()
+    def reset(self, **kwargs):
+        obs, info = self.env.reset(**kwargs)
         for _ in range(self.n_frames):
             self.frames.append(obs)
-        return self._get_ob()
+        return self._get_ob(), info
 
     def step(self, action):
-        obs, reward, done, info = self.env.step(action)
+        obs, reward, done, truncated, info = self.env.step(action)
         self.frames.append(obs)
-        return self._get_ob(), reward, done, info
+        return self._get_ob(), reward, done, truncated, info
 
     def _get_ob(self):
         # the original wrapper use `LazyFrames` but since we use np buffer,
         # it has no effect
         return np.stack(self.frames, axis=0)
 
-def wrap_deepmind(env_id, episode_life=True, clip_rewards=True,
+def wrap_deepmind(env_id, episode_life=False, clip_rewards=True,
                   frame_stack=4, scale=False, warp_frame=True,
                   punish_stuck_agent=False, **kwargs):
     """Configure environment for DeepMind-style Atari. The observation is
@@ -136,8 +137,8 @@ def wrap_deepmind(env_id, episode_life=True, clip_rewards=True,
     env = gym.make(env_id, **kwargs)
     # env = NoopResetEnv(env, noop_max=30)
     # env = MaxAndSkipEnv(env, skip=4)
-    if episode_life:
-        env = EpisodicLifeEnv(env)
+    # if episode_life:
+    #     env = EpisodicLifeEnv(env)  # Commented out as EpisodicLifeEnv is not defined
     # if 'FIRE' in env.unwrapped.get_action_meanings():
     #     env = FireResetEnv(env)
     if warp_frame:
@@ -146,6 +147,8 @@ def wrap_deepmind(env_id, episode_life=True, clip_rewards=True,
         env = ScaledFloatFrame(env)
     if clip_rewards:
         env = ClipRewardEnv(env)
+    if punish_stuck_agent:
+        env = PunishStuckAgent(env)
     if frame_stack:
         env = FrameStack(env, frame_stack)
     return env
