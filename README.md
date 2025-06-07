@@ -2,18 +2,48 @@
 This repo tries to solve snake game (10, 10) and (20, 20) in an efficient way with multiple envs and fp16 training
 using A2C and PPO.
 
-## Dependencies
+## Installation
 
-Slightly modified version of tianshou to support fp16 training and custom networks:
+This project uses `uv` for dependency management and supports modern Python package standards via `pyproject.toml`.
 
-    pip install git+https://github.com/realiti4/tianshou.git@master --upgrade
-    
-Gym-snake environment:
+### Prerequisites
+- Python 3.12 or higher
+- [uv](https://docs.astral.sh/uv/getting-started/installation/) package manager
 
-    pip install git+https://github.com/realiti4/Gym-Snake.git@master --upgrade
+### Install with uv (Recommended)
+```bash
+# Install uv if you haven't already
+pip install uv
+
+# Install the project and all dependencies
+uv sync
+```
+
+### Install with pip (Alternative)
+```bash
+pip install -e .
+```
+
+The project automatically installs:
+- Modified version of tianshou with fp16 training and custom networks support
+- Gym-Snake environment
+- PyTorch with CUDA 12.8 support (configurable via tool.uv.sources in pyproject.toml)
     
 ## Training
-Simply run `main.py`
+
+With uv:
+```bash
+uv run main_a2c.py  # for A2C training
+# or
+uv run main_ppo.py  # for PPO training
+```
+
+With traditional Python:
+```bash
+python main_a2c.py  # for A2C training
+# or
+python main_ppo.py  # for PPO training
+```
 
 ## Notes
 
