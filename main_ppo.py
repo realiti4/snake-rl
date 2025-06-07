@@ -24,7 +24,7 @@ lr, epoch, batch_size = 1e-3, 100, 256
 train_num, test_num = 256, 16
 buffer_size = 2000
 
-# Use SubprocVectorEnv instead of Dummy one if you are on
+# Use SubprocVectorEnv instead of Dummy one if you are on Linux
 train_envs = ts.env.DummyVectorEnv([lambda: make_env_wrapper() for _ in range(train_num)])
 test_envs = ts.env.DummyVectorEnv([lambda: make_env_wrapper() for _ in range(test_num)])
 

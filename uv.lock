@@ -167,15 +167,8 @@ wheels = [
 [[package]]
 name = "gym-snake"
 version = "0.1.0"
-source = { editable = "../Gym-Snake" }
+source = { git = "https://github.com/realiti4/Gym-Snake?branch=master#62cd2273c34dc909fc747a3c43825716bdd77ec6" }
 dependencies = [
-    { name = "gymnasium" },
-    { name = "matplotlib" },
-    { name = "numpy" },
-]
-
-[package.metadata]
-requires-dist = [
     { name = "gymnasium" },
     { name = "matplotlib" },
     { name = "numpy" },
@@ -784,7 +777,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "gym-snake", editable = "../Gym-Snake" },
+    { name = "gym-snake", git = "https://github.com/realiti4/Gym-Snake?branch=master" },
     { name = "opencv-python", specifier = ">=4.11.0.86" },
     { name = "tianshou", git = "https://github.com/realiti4/tianshou?branch=master" },
     { name = "torch", specifier = ">=2.7.1", index = "https://download.pytorch.org/whl/cu128" },
