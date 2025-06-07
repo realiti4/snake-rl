@@ -167,7 +167,7 @@ wheels = [
 [[package]]
 name = "gym-snake"
 version = "0.1.0"
-source = { git = "https://github.com/realiti4/Gym-Snake?branch=master#62cd2273c34dc909fc747a3c43825716bdd77ec6" }
+source = { git = "https://github.com/realiti4/Gym-Snake?branch=master#f02697ace507ca6d63a1307d14b53ca65a54ce31" }
 dependencies = [
     { name = "gymnasium" },
     { name = "matplotlib" },
